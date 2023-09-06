@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -16,19 +15,19 @@ int main(int argc, char* argv[]) {
     //std::cout<<"Give command like   --->  {  ./clientA 'ip-address' 'COMMAND'  } \n  COMMAND:\n UPLOAD/<fileinClientDirectory> \n DOWNLOAD/<fileinServerDirectory> \n LIST  ";
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <server_ip_address> <COMMAND>\n";
-        return 0;
+        return 1;
     }
 
     const char* serverIP = argv[1];
     int port = std::stoi("12345");
-   
+    //const char* ToDo =argv[3];
     const char* fileToSend = argv[2];
    
 
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (clientSocket == -1) {
         perror("Failed to create socket");
-        return 0;
+        return 1;
     }
 
     sockaddr_in serverAddr;
@@ -39,18 +38,18 @@ int main(int argc, char* argv[]) {
     if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
         perror("Failed to connect to the server");
         close(clientSocket);
-        return 0;
+        return 1;
     }
 //    if (send(clientSocket, ToDo, strlen(ToDo), 0) == -1) {
 //         perror("Failed to send ToDo");
 //         close(clientSocket);
-//         return 0;
+//         return 1;
 //     }
-   
+    // Send the file name as the first chunk
     if (send(clientSocket, fileToSend, strlen(fileToSend), 0) == -1) {
         perror("Failed to send file name");
         close(clientSocket);
-        return 0;
+        return 1;
     }
     std::string Do;
     std::string file;
@@ -76,37 +75,37 @@ if (Do=="LIST") {
     if (byteRead == -1) {
         std::cerr << "Receive failed" << std::endl;
         close(clientSocket);
-        return 0;
+        return 1;
     }
 
     if (byteRead == 0) {
         std::cout << "Server disconnected." << std::endl;
-        return 0;
+        return 1;
     }
 
-    listBuffer[byteRead] = '\0'; 
+    listBuffer[byteRead] = '\0'; // Null-terminate the received data
     std::cout << "File list from server:\n" << listBuffer;
 
- 
+    // Close the socket after printing the list
     close(clientSocket);
 
-    return 0;
+    return 1;
 }
-if(Do=="DOWNLOAD"){
-  
-    const char* fileName = fileN;
+else if(Do=="DOWNLOAD"){
+    // Send the file name as the request
+    const char* fileName = fileN; // Modify this with the desired filename
     if (send(clientSocket, fileName, strlen(fileName), 0) == -1) {
         perror("Failed to send file request");
         close(clientSocket);
-        return 0;
+        return 1;
     }
 
-
+    // Receive the file data from the server and save it
     std::ofstream outputFile(fileName, std::ios::out | std::ios::binary);
     if (!outputFile.is_open()) {
         perror("Error opening file for download");
         close(clientSocket);
-        return 0;
+        return 1;
     }
 
     char buffer[BUFFER_SIZE];
@@ -121,16 +120,16 @@ if(Do=="DOWNLOAD"){
     close(clientSocket);
     return 0;
 }
-
-  
+else{
+    // Open the file to send
     std::ifstream inputFile(fileN, std::ios::in | std::ios::binary);
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file.\n";
         close(clientSocket);
-        return 0;
+        return 1;
     }
 
-    
+    // Send file data to server in chunks
     char buffer[BUFFER_SIZE];
     while (!inputFile.eof()) {
         inputFile.read(buffer, sizeof(buffer));
@@ -140,14 +139,14 @@ if(Do=="DOWNLOAD"){
                 perror("Failed to send file data");
                 inputFile.close();
                 close(clientSocket);
-                return 0;
+                return 1;
             }
         }
     }
 
     inputFile.close();
     std::cout << "File '" << fileN << "' sent successfully.\n";
-
+}
     close(clientSocket);
     return 0;
 }
