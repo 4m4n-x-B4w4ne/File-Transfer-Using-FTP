@@ -50,7 +50,7 @@
             perror("Error binding");
             exit(1);
         }
-
+         while(true){
         // Listen for incoming connections
         if (listen(serverSocket, 10) == 0) {
             printf("Server listening...\n");
@@ -111,11 +111,9 @@
                         close(serverSocket);
                         return 1;
                     }
-                    close(newSocket);
-                    close(serverSocket);
-                    return 1;
+                   
                 }
-                if(Do=="DOWNLOAD"){
+                else if(Do=="DOWNLOAD"){
             const char* fileName=fileN;
         std::ifstream inputFile(fileName, std::ios::in | std::ios::binary);
         if (!inputFile.is_open()) {
@@ -143,11 +141,12 @@
 
         inputFile.close();
         std::cout << "File '" << fileName << "' sent successfully.\n";
-
         close(newSocket);
-        close(serverSocket);
-        return 0;
-                }
+        
+                }else if(Do=="STOP"){
+                    std::cout<<"Server has been closed successfully.\n";
+                    break;
+                }else{
 
         // Open the file to write
         std::ofstream outputFile(fileN, std::ios::out | std::ios::binary);
@@ -164,7 +163,8 @@
 
         outputFile.close();
         std::cout << "File received and stored as '" << file << "'.\n";
-
+                }
+         }
         close(newSocket);
         close(serverSocket);
         return 0;
