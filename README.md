@@ -1,4 +1,7 @@
 
+# File Transfer System.
+
+The Project can transfer the file over Local Area Network using Standard File Transfer System Protocol(FTP).
 ## Quick Installation
 
 To clone this project run
