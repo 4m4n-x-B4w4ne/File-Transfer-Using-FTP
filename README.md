@@ -7,7 +7,7 @@ The Project can transfer the file over Local Area Network using Standard File Tr
 To clone this project run
 
 ```bash
- git clone https://github.com/4m4n-x-B4w4ne/FTSREpo.git
+ git clone https://github.com/4m4n-x-B4w4ne/File-Transfer-Using-FTP.git
 ```
 
 You can use two different devices( 127.0.0.1(loopback) for single device test purpose).
